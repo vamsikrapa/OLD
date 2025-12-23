@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title></head>
+<body>
+    <script>
+        // --- CONFIGURATION ---
+        const LINKEDIN_URL = "https://www.linkedin.com/in/vamsikrapa/";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTxOqzzbf75UC_sW57LHaTytYhk5GQOglVDN4xrfv0-DVX640j7rWnfyMsivEJCdR1/exec";
+        const TIMEOUT_MS = 1500; // 1.5 seconds safety limit
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const company = urlParams.get('co') || 'Not Specified';
+        const device = navigator.userAgent;
+
+        let redirected = false;
+        function goToLinkedIn() {
+            if (!redirected) {
+                redirected = true;
+                window.location.href = LINKEDIN_URL;
+            }
+        }
+
+        // Safety backup: Redirect if tracking takes too long
+        setTimeout(goToLinkedIn, TIMEOUT_MS);
+
+        // Fetch Location & Log Data
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                const locInfo = `${data.city}, ${data.region}, ${data.country_name} (IP: ${data.ip})`;
+                return fetch(`${SCRIPT_URL}?co=${encodeURIComponent(company)}&device=${encodeURIComponent(device)}&loc=${encodeURIComponent(locInfo)}`, {mode:'no-cors'});
+            })
+            .catch(() => {
+                return fetch(`${SCRIPT_URL}?co=${encodeURIComponent(company)}&device=${encodeURIComponent(device)}&loc=Blocked`, {mode:'no-cors'});
+            })
+            .finally(() => { goToLinkedIn(); });
+    </script>
+    <div style="text-align center; font-family: Arial; margin-top: 50px;">
+        <p>Loading Profile...</p>
+    </div>
+</body>
+</html>
